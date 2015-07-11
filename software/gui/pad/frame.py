@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import wx
-
+from panel import PadPanel
 #######################################################################
 class Frame(wx.Frame):
     ###################################################################
@@ -32,4 +32,5 @@ class Frame(wx.Frame):
 if __name__ == "__main__":
     app = wx.App(False)
     frame = Frame(None)
+    panel = PadPanel(frame)
     app.MainLoop()
