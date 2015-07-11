@@ -9,6 +9,9 @@ class PadPanel(wx.Panel):
 	self.grid = wx.GridBagSizer(hgap=2, vgap=2)
 	self._xpos = 0
 	self._ypos = 0
+	self.sawPos=None
+	self.isMetric=True
+	self.display = wx.TextCtrl(self, size=(260, 25), style=wx.TE_READONLY)
 	self.button0 = wx.Button(self, label = "0")
 	self.button1 = wx.Button(self, label = "1")
 	self.button2 = wx.Button(self, label = "2")
@@ -21,7 +24,11 @@ class PadPanel(wx.Panel):
 	self.button9 = wx.Button(self, label = "9")
 	self.buttonDec = wx.Button(self, label = ".")
 	self.buttonClr = wx.Button(self, label = "Clear")
-	self.display = wx.TextCtrl(self, size=(300, 25), style=wx.TE_READONLY)
+	self.buttonSetFencePos= wx.Button(self, label = "Set Fence Position")
+	self.buttonGetFencePos= wx.Button(self, label = "Get Fence Position")
+	self.metricImperialList = ['Metric (mm)', 'Imperial (inch)']
+	self.metricImperial = wx.RadioBox(self, label="System of Measure",\
+		choices=self.metricImperialList, majorDimension=2, style=wx.RA_SPECIFY_COLS)
 	self.alignBindPanel()
     ###################################################################
     def alignBindPanel(self):
@@ -45,6 +52,10 @@ class PadPanel(wx.Panel):
 	self._addGuiCell(self.buttonDec)
 	self._addGuiCell(self.button0)
 	self._addGuiCell(self.buttonClr)
+	self._incGuiRow()
+	self._addGuiRow(self.buttonSetFencePos)
+	self._addGuiRow(self.buttonGetFencePos)
+	self._addGuiRow(self.metricImperial)
 	#Bind the buttons
 	self.Bind(wx.EVT_BUTTON, self.onButton1, self.button1)
 	self.Bind(wx.EVT_BUTTON, self.onButton2, self.button2)
@@ -58,6 +69,9 @@ class PadPanel(wx.Panel):
 	self.Bind(wx.EVT_BUTTON, self.onButton0, self.button0)
 	self.Bind(wx.EVT_BUTTON, self.onButtonDec, self.buttonDec)
 	self.Bind(wx.EVT_BUTTON, self.onButtonClr, self.buttonClr)
+	self.Bind(wx.EVT_BUTTON, self.onButtonSetFencePos, self.buttonSetFencePos)
+	self.Bind(wx.EVT_BUTTON, self.onButtonGetFencePos, self.buttonSetFencePos)
+	self.Bind(wx.EVT_RADIOBOX, self.onMetricImperial, self.metricImperial)
 	self.SetSizerAndFit(self.grid)
 	print "Done align and bind"
     ###################################################################
@@ -96,6 +110,21 @@ class PadPanel(wx.Panel):
     ###################################################################
     def onButtonClr(self, event):
 	self._updateDisplay(clear=True)
+    ###################################################################
+    def onButtonSetFencePos(self, event):
+	if self.display.IsEmpty() is True:
+	    pass
+	else:
+  	    pass	    
+    ###################################################################
+    def onButtonGetFencePos(self, event):
+	if self.display.IsEmpty() is True:
+	    pass
+	else:
+  	    pass	    
+    ###################################################################
+    def onMetricImperial(self, event):
+	self._updateDisplay(value="SysMeasureChange")
     ###################################################################
     ###################LOCAL METHODS/HELPERS###########################
     ###################################################################
