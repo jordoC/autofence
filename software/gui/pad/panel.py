@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import wx
+from time import sleep
 #######################################################################
 class PadPanel(wx.Panel):
     ###################################################################
@@ -9,7 +10,7 @@ class PadPanel(wx.Panel):
 	self.grid = wx.GridBagSizer(hgap=2, vgap=2)
 	self._xpos = 0
 	self._ypos = 0
-	self.sawPos=None
+	self.fencePos=None
 	self.isMetric=True
 	self.display = wx.TextCtrl(self, size=(260, 25), style=wx.TE_READONLY)
 	self.button0 = wx.Button(self, label = "0")
@@ -24,8 +25,9 @@ class PadPanel(wx.Panel):
 	self.button9 = wx.Button(self, label = "9")
 	self.buttonDec = wx.Button(self, label = ".")
 	self.buttonClr = wx.Button(self, label = "Clear")
-	self.buttonSetFencePos= wx.Button(self, label = "Set Fence Position")
-	self.buttonGetFencePos= wx.Button(self, label = "Get Fence Position")
+	self.buttonSetFencePos= wx.Button(self, label = "Set Position")
+	self.buttonGetFencePos= wx.Button(self, label = "Get Position")
+	#NOTE: order of this list matters: 0-->metric, 1-->imperial
 	self.metricImperialList = ['Metric (mm)', 'Imperial (inch)']
 	self.metricImperial = wx.RadioBox(self, label="System of Measure",\
 		choices=self.metricImperialList, majorDimension=2, style=wx.RA_SPECIFY_COLS)
@@ -53,8 +55,9 @@ class PadPanel(wx.Panel):
 	self._addGuiCell(self.button0)
 	self._addGuiCell(self.buttonClr)
 	self._incGuiRow()
-	self._addGuiRow(self.buttonSetFencePos)
-	self._addGuiRow(self.buttonGetFencePos)
+	self._addGuiCell(self.buttonSetFencePos)
+	self._addGuiCell(self.buttonGetFencePos)
+	self._incGuiRow()
 	self._addGuiRow(self.metricImperial)
 	#Bind the buttons
 	self.Bind(wx.EVT_BUTTON, self.onButton1, self.button1)
@@ -70,10 +73,9 @@ class PadPanel(wx.Panel):
 	self.Bind(wx.EVT_BUTTON, self.onButtonDec, self.buttonDec)
 	self.Bind(wx.EVT_BUTTON, self.onButtonClr, self.buttonClr)
 	self.Bind(wx.EVT_BUTTON, self.onButtonSetFencePos, self.buttonSetFencePos)
-	self.Bind(wx.EVT_BUTTON, self.onButtonGetFencePos, self.buttonSetFencePos)
+	self.Bind(wx.EVT_BUTTON, self.onButtonGetFencePos, self.buttonGetFencePos)
 	self.Bind(wx.EVT_RADIOBOX, self.onMetricImperial, self.metricImperial)
 	self.SetSizerAndFit(self.grid)
-	print "Done align and bind"
     ###################################################################
     def onButton1(self, event):
 	self._updateDisplay(value="1")
@@ -112,19 +114,52 @@ class PadPanel(wx.Panel):
 	self._updateDisplay(clear=True)
     ###################################################################
     def onButtonSetFencePos(self, event):
-	if self.display.IsEmpty() is True:
-	    pass
-	else:
-  	    pass	    
+        val = self.display.GetValue()
+        if self.display.IsEmpty() is True:
+            pass
+        else:
+            self.fencePos = float(val)
+#        if self.isMetric is True:
+#            if self.display.IsEmpty() is True:
+#                pass
+#            else:
+#                self.fencePos = float(val)
+#        else:
+#            if self.display.IsEmpty() is True:
+#                pass
+#            else:
+#                self.fencePos = float(val)/25.4
     ###################################################################
     def onButtonGetFencePos(self, event):
-	if self.display.IsEmpty() is True:
-	    pass
-	else:
-  	    pass	    
+        if self.fencePos is None:
+            self._updateDisplay(value="Fence is not Set", clear=True)
+            sleep(2)
+            self._updateDisplay(clear=True)
+        else:
+            self._updateDisplay(value=str(self.fencePos), clear=True)
+        
     ###################################################################
     def onMetricImperial(self, event):
-	self._updateDisplay(value="SysMeasureChange")
+        val = self.display.GetValue()
+        if (self.metricImperial.GetSelection() == 0):
+            if self.display.IsEmpty() is True:
+                self.isMetric = True 
+            else:
+                self.fencePos = float(val)*25.4
+                imperialVal = float(val)
+                metricVal = str(imperialVal*25.4)
+                self._updateDisplay(value=metricVal, clear=True)
+                self.isMetric = True 
+        else:
+            if self.display.IsEmpty() is True:
+                self.isMetric = False 
+            else:
+                self.fencePos = float(val)/25.4
+                metricVal = float(val)
+                imperialVal = str(metricVal/25.4)
+                self._updateDisplay(value=imperialVal, clear=True)
+                self.isMetric = False
+
     ###################################################################
     ###################LOCAL METHODS/HELPERS###########################
     ###################################################################
@@ -147,12 +182,10 @@ class PadPanel(wx.Panel):
     def _updateDisplay(self, value="", clear=False):
 	if clear is True:
 	    self.display.Clear()
-	else:
-	    self.display.SetInsertionPointEnd()
-	    self.display.write(value)
+    	self.display.SetInsertionPointEnd()
+    	self.display.write(value)
 #######################################################################
 if __name__ == "__main__":
-    print "Main"
     app = wx.App(False)
     frame = wx.Frame(None)
     panel = PadPanel(frame)
